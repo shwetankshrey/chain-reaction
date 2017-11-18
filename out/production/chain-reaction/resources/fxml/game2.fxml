@@ -21,7 +21,7 @@
         <Font name="Arial" size="28.0" />
       </font>
     </Label>
-    <Button layoutX="463.0" layoutY="22.0" mnemonicParsing="false" style="-fx-background-color : black;&#10;" text="UNDO" textFill="WHITE">
+    <Button fx:id="undoB" layoutX="463.0" layoutY="22.0" mnemonicParsing="false" style="-fx-background-color : black;&#10;" text="UNDO" textFill="WHITE">
       <font>
         <Font name="Arial" size="15.0" />
       </font>

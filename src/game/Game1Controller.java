@@ -1,29 +1,36 @@
 package game;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Sphere;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import sun.audio.AudioPlayer;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * <h1>SD GAME CONTROLLER</h1>
+ * Controller class for SD grid, including current state,
+ * previous states, etc.
+ * @author Shwetank Shrey and Kanav Bhagat
+ * @version 0.2
+ * @since November 2017
+ */
 public class Game1Controller {
 
     private int count, numP;
@@ -34,6 +41,14 @@ public class Game1Controller {
     @FXML private Pane root;
     @FXML private Button undoB;
 
+    /**
+     * Initializes the FXML. Hides the UNDO button,
+     * adds important parameters to the current gamestate,
+     * creates and initialises new grids for current and
+     * previous states, and adds pane for each cell to
+     * the main root pane. Also starts the count and gives
+     * initial colors to the grid.
+     */
     @FXML public void initialize() {
         undoB.setVisible(false);
         numP = GameState.numPlayers;
@@ -50,7 +65,7 @@ public class Game1Controller {
                     grid[i][j] = new Cell(i, j, 100, 219, 80, 20);
                     undogrid[i][j] = new Cell(i, j, 100, 219, 80, 20);
                 }
-                root.getChildren().add(grid[i][j].pn);
+                root.getChildren().add(grid[i][j].getPn());
             }
         }
         if(GameState.saveGame == 1) {
@@ -76,11 +91,24 @@ public class Game1Controller {
         }
     }
 
+    /**
+     * Event Handler for the button that restarts the game
+     * by clearing the grid and creating a new instance of the FXML.
+     * @param event Click Triggered Event
+     * @throws Exception Any Exception
+     */
     @FXML protected void restart(ActionEvent event) throws Exception {
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game1.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
 
+    /**
+     * Event Handler for the Save button. Adds necessary
+     * properties to the SaveGame static class properties
+     * and uses the serialize in Main to save the state.
+     * @param event Click Triggered Event
+     * @throws Exception Any Exception
+     */
     @FXML protected void save(ActionEvent event) throws Exception {
         SaveGame s1 = new SaveGame();
         s1.numPlayers = GameState.numPlayers;
@@ -90,11 +118,30 @@ public class Game1Controller {
         Main.save(s1);
     }
 
+    /**
+     * Event Handler for the Exit Button to take the
+     * user to the Home Screen.
+     * @param event Click Triggered Event
+     * @throws Exception Any Exception
+     */
     @FXML protected void goHome(ActionEvent event) throws Exception {
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/home.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
 
+    /**
+     * Event Handler for the Game. The grid is comprised of
+     * buttons arranged in a grid format. For every button
+     * pressed the coordinated are checked and the
+     * appropriate trigger cell is decided. While saving
+     * the previous grid state, the grid is altered and
+     * the number of orbs is increased. The appropriate
+     * color is set for the cell and the grid is
+     * checked for explosions. Then the grid color
+     * is changed for the next player.
+     * @param event Click Triggered Event
+     * @throws Exception Any Exception
+     */
     @FXML protected void clk(ActionEvent event) throws Exception {
         Button rx = (Button) event.getSource();
         int xx = ((int) rx.getLayoutX()-60)/80;
@@ -126,41 +173,28 @@ public class Game1Controller {
         }
         undoB.setVisible(true);
         checkGame();
-        List<Node> l = root.getChildren();
-        for (Button ix : lst) {
-            ix.toFront();
-        }
-        /*
-        System.out.println(count);
-        if(count >= numP) {
-            boolean playerCheck = true;
-            while (playerCheck) {
-                count++;
-                Color cx = cs[count % numP];
-                for (int ix = 0; ix < 6; ix++) {
-                    for (int j = 0; j < 8; j++) {
-                        if (cx == grid[i][j].getColor()) {
-                            playerCheck = false;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        else {
-            count++;
-        }
-        */
         count++;
-        for (Node ix : l) {
+        for (Node ix : root.getChildren()) {
             if (ix instanceof Rectangle)
                 ((Rectangle) ix).setStroke(cs[count%numP]);
             if (ix instanceof Line)
                 ((Line) ix).setStroke(cs[count%numP]);
         }
+        for (Button ix : lst) {
+            ix.toFront();
+        }
     }
 
-    private void checkExplosion(int x, int y) throws Exception {
+    /**
+     * Checks possibility of explosion for specified
+     * cell, if exists, then explodes it by changing
+     * numbers of the cells and using transitions to
+     * show the animation and checks for explosions
+     * in the affected cells.
+     * @param x X Coordinate in Grid
+     * @param y Y Coordinate in Grid
+     */
+    private void checkExplosion(int x, int y) {
         boolean toExp = false;
         Color col = grid[x][y].getColor();
         if((x==0 && y ==0) || (x==5 && y==0) || (x==5 && y==7) || (x==0 & y==7)) {
@@ -180,61 +214,123 @@ public class Game1Controller {
         }
         if(toExp) {
             grid[x][y].numb = 0;
-            grid[x][y].setColor(null);
             grid[x][y].clk();
-            //GameState.sfx.play();
+            GameState.sfx.play();
+            Group p = new Group();
+            root.getChildren().add(p);
+            TranslateTransition[] tt = new TranslateTransition[4];
+            int i = 0;
             if(x!=0) {
-                grid[x][y].expLeft();
+                Sphere cr = new Sphere(20);
+                cr.setLayoutX(100+x*80);
+                cr.setLayoutY(219+y*80);
+                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                p.getChildren().add(cr);
+                tt[i] = new TranslateTransition(Duration.millis(500),cr);
+                tt[i].setByX(-80f);
+                tt[i].setCycleCount(1);
+                i++;
             }
             if(x!=5) {
-                grid[x][y].expRight();
+                Sphere cr = new Sphere(20);
+                cr.setLayoutX(100+80*x);
+                cr.setLayoutY(219+80*y);
+                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                p.getChildren().add(cr);
+                tt[i] = new TranslateTransition(Duration.millis(500),cr);
+                tt[i].setByX(80f);
+                tt[i].setCycleCount(1);
+                i++;
             }
             if(y!=0) {
-                grid[x][y].expUp();
+                Sphere cr = new Sphere(20);
+                cr.setLayoutX(100+80*x);
+                cr.setLayoutY(219+80*y);
+                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                p.getChildren().add(cr);
+                tt[i] = new TranslateTransition(Duration.millis(500),cr);
+                tt[i].setByY(-80f);
+                tt[i].setCycleCount(1);
+                i++;
             }
             if(y!=7) {
-                grid[x][y].expDown();
+                Sphere cr = new Sphere(20);
+                cr.setLayoutX(100+80*x);
+                cr.setLayoutY(219+80*y);
+                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                p.getChildren().add(cr);
+                tt[i] = new TranslateTransition(Duration.millis(500),cr);
+                tt[i].setByY(80f);
+                tt[i].setCycleCount(1);
+                i++;
             }
-            if(x!=0) {
-                grid[x-1][y].numb++;
-                grid[x-1][y].setColor(col);
-                grid[x-1][y].clk();
-                checkExplosion(x-1,y);
+            grid[x][y].setColor(null);
+            ParallelTransition pt = new ParallelTransition();
+            switch (i) {
+                case 1: pt = new ParallelTransition(tt[0]); break;
+                case 2: pt = new ParallelTransition(tt[0],tt[1]); break;
+                case 3: pt = new ParallelTransition(tt[0],tt[1],tt[2]); break;
+                case 4: pt = new ParallelTransition(tt[0],tt[1],tt[2],tt[3]); break;
             }
-            if(x!=5) {
-                grid[x+1][y].numb++;
-                grid[x+1][y].setColor(col);
-                grid[x+1][y].clk();
-                checkExplosion(x+1,y);
-            }
-            if(y!=0) {
-                grid[x][y-1].numb++;
-                grid[x][y-1].setColor(col);
-                grid[x][y-1].clk();
-                checkExplosion(x,y-1);
-            }
-            if(y!=7) {
-                grid[x][y+1].numb++;
-                grid[x][y+1].setColor(col);
-                grid[x][y+1].clk();
-                checkExplosion(x,y+1);
-            }
+            pt.play();
+            pt.setOnFinished(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    p.getChildren().clear();
+                    root.getChildren().remove(p);
+                    if(x!=0) {
+                        grid[x-1][y].numb++;
+                        grid[x-1][y].setColor(col);
+                        grid[x-1][y].clk();
+                        checkExplosion(x-1,y);
+                    }
+                    if(x!=5) {
+                        grid[x+1][y].numb++;
+                        grid[x+1][y].setColor(col);
+                        grid[x+1][y].clk();
+                        checkExplosion(x+1,y);
+                    }
+                    if(y!=0) {
+                        grid[x][y-1].numb++;
+                        grid[x][y-1].setColor(col);
+                        grid[x][y-1].clk();
+                        checkExplosion(x,y-1);
+                    }
+                    if(y!=7) {
+                        grid[x][y+1].numb++;
+                        grid[x][y+1].setColor(col);
+                        grid[x][y+1].clk();
+                        checkExplosion(x,y+1);
+                    }
+                }
+            });
         }
         return;
     }
 
+    /**
+     * Checks if the current player has won the
+     * game or not. Traverses through the grid
+     * looking for a common color.
+     * @throws IOException Input Output Exception
+     */
     private void checkGame() throws IOException {
-        if(count < 2) {
+        if(count < numP) {
             return;
         }
         Color cx = null;
         for(int i = 0 ; i < 6 ; i++) {
             for(int j = 0 ; j < 8 ; j++) {
-                if(cx != null && grid[i][j].getColor() != null && cx != grid[i][j].getColor()) {
-                    return;
-                }
                 if(cx == null && grid[i][j].getColor() != null) {
                     cx = grid[i][j].getColor();
+                    break;
+                }
+            }
+        }
+        for(int i = 0 ; i < 6 ; i++) {
+            for(int j = 0 ; j < 8 ; j++) {
+                if(grid[i][j].getColor() != null && cx != grid[i][j].getColor()) {
+                    return;
                 }
             }
         }
@@ -244,6 +340,14 @@ public class Game1Controller {
         stagex.setTitle("Player " + (count%numP + 1) + " WINS!!");
         stagex.show();
     }
+
+    /**
+     * Event handler for the UNDO button. Previous grid
+     * is set as the current grid and the UNDO button
+     * is hidden to prevent misuse.
+     * @param event Click Triggered Event
+     * @throws Exception Any Exception
+     */
     @FXML protected void undo(ActionEvent event) throws Exception {
         List<Node> l = root.getChildren();
         grid = new Cell[6][8];
