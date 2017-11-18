@@ -13,6 +13,7 @@ public class HomeController {
     @FXML protected void playSD(ActionEvent event) throws Exception {
         int op = playerChoice.getSelectionModel().getSelectedIndex();
         GameState.numPlayers = op + 2;
+        GameState.saveGame = 0;
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game1.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
@@ -20,6 +21,7 @@ public class HomeController {
     @FXML protected void playHD(ActionEvent event) throws Exception {
         int op = playerChoice.getSelectionModel().getSelectedIndex();
         GameState.numPlayers = op + 2;
+        GameState.saveGame = 0;
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game2.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
@@ -30,6 +32,17 @@ public class HomeController {
     }
 
     @FXML protected void resume(ActionEvent event) throws Exception {
-
+        SaveGame x = Main.load();
+        GameState.colorCodes = x.colorCodes;
+        GameState.numPlayers = x.numPlayers;
+        GameState.saveGame = 1;
+        if(x.grid[0][0].rad == 20) {
+            Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game1.fxml")), 600, 900);
+            GameState.mainStage.setScene(s);
+        }
+        else {
+            Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game2.fxml")), 600, 900);
+            GameState.mainStage.setScene(s);
+        }
     }
 }
