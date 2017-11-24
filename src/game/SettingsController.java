@@ -20,6 +20,9 @@ public class SettingsController {
     private Stage stagex = new Stage();
     @FXML private ChoiceBox soundchoice;
 
+    @FXML public void initialize() {
+        soundchoice.setValue(GameState.sval);
+    }
     /**
      * Event Handler for Button to save sound choice and
      * go back to the home page.
@@ -28,6 +31,7 @@ public class SettingsController {
      */
     @FXML protected void goBack(ActionEvent event) throws Exception {
         int op = soundchoice.getSelectionModel().getSelectedIndex();
+        GameState.sval = (String) soundchoice.getSelectionModel().getSelectedItem();
         if(op==0)
             GameState.sfx = new AudioClip(PreferencesController.class.getResource("../resources/sound/beep.wav").toString());
         if(op==1)

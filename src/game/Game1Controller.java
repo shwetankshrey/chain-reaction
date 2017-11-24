@@ -51,6 +51,7 @@ public class Game1Controller {
      */
     @FXML public void initialize() {
         undoB.setVisible(false);
+        GameState.isWon = false;
         numP = GameState.numPlayers;
         cs = new Color[numP];
         grid = new Cell[6][8];
@@ -125,6 +126,10 @@ public class Game1Controller {
      * @throws Exception Any Exception
      */
     @FXML protected void goHome(ActionEvent event) throws Exception {
+        SaveGame.grid = null;
+        SaveGame.colorCodes = null;
+        SaveGame.numPlayers = 0;
+        SaveGame.count = 0;
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/home.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
@@ -171,9 +176,8 @@ public class Game1Controller {
             grid[xx][yy].clk();
             checkExplosion(xx, yy);
         }
-        undoB.setVisible(true);
-        checkGame();
         count++;
+        undoB.setVisible(true);
         for (Node ix : root.getChildren()) {
             if (ix instanceof Rectangle)
                 ((Rectangle) ix).setStroke(cs[count%numP]);
@@ -215,6 +219,7 @@ public class Game1Controller {
         if(toExp) {
             grid[x][y].numb = 0;
             grid[x][y].clk();
+            grid[x][y].setColor(null);
             GameState.sfx.play();
             Group p = new Group();
             root.getChildren().add(p);
@@ -224,7 +229,7 @@ public class Game1Controller {
                 Sphere cr = new Sphere(20);
                 cr.setLayoutX(100+x*80);
                 cr.setLayoutY(219+y*80);
-                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                cr.setMaterial(new PhongMaterial(col));
                 p.getChildren().add(cr);
                 tt[i] = new TranslateTransition(Duration.millis(500),cr);
                 tt[i].setByX(-80f);
@@ -235,7 +240,7 @@ public class Game1Controller {
                 Sphere cr = new Sphere(20);
                 cr.setLayoutX(100+80*x);
                 cr.setLayoutY(219+80*y);
-                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                cr.setMaterial(new PhongMaterial(col));
                 p.getChildren().add(cr);
                 tt[i] = new TranslateTransition(Duration.millis(500),cr);
                 tt[i].setByX(80f);
@@ -246,7 +251,7 @@ public class Game1Controller {
                 Sphere cr = new Sphere(20);
                 cr.setLayoutX(100+80*x);
                 cr.setLayoutY(219+80*y);
-                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                cr.setMaterial(new PhongMaterial(col));
                 p.getChildren().add(cr);
                 tt[i] = new TranslateTransition(Duration.millis(500),cr);
                 tt[i].setByY(-80f);
@@ -257,7 +262,7 @@ public class Game1Controller {
                 Sphere cr = new Sphere(20);
                 cr.setLayoutX(100+80*x);
                 cr.setLayoutY(219+80*y);
-                cr.setMaterial(new PhongMaterial(grid[x][y].getColor()));
+                cr.setMaterial(new PhongMaterial(col));
                 p.getChildren().add(cr);
                 tt[i] = new TranslateTransition(Duration.millis(500),cr);
                 tt[i].setByY(80f);
@@ -302,6 +307,10 @@ public class Game1Controller {
                         grid[x][y+1].clk();
                         checkExplosion(x,y+1);
                     }
+                    try {
+                        checkGame();
+                    }
+                    catch (IOException e) {}
                 }
             });
         }
@@ -315,13 +324,13 @@ public class Game1Controller {
      * @throws IOException Input Output Exception
      */
     private void checkGame() throws IOException {
-        if(count < numP) {
+        if(count < numP || GameState.isWon) {
             return;
         }
         Color cx = null;
         for(int i = 0 ; i < 6 ; i++) {
             for(int j = 0 ; j < 8 ; j++) {
-                if(cx == null && grid[i][j].getColor() != null) {
+                if(grid[i][j].getColor() != null) {
                     cx = grid[i][j].getColor();
                     break;
                 }
@@ -334,13 +343,13 @@ public class Game1Controller {
                 }
             }
         }
+        GameState.isWon = true;
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/winner.fxml")), 550, 250);
         Stage stagex = new Stage();
         stagex.setScene(s);
-        stagex.setTitle("Player " + (count%numP + 1) + " WINS!!");
+        stagex.setTitle("Player " + ((count-1)%numP + 1) + " WINS!!");
         stagex.show();
     }
-
     /**
      * Event handler for the UNDO button. Previous grid
      * is set as the current grid and the UNDO button

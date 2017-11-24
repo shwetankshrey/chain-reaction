@@ -131,14 +131,15 @@ class Cell {
      * and adds it to the cell pane.
      */
     private void twoSphere() {
+        int r = rad==20?10:5;
         Sphere s1 = new Sphere(rad);
         Sphere s2 = new Sphere(rad);
         s1.setMaterial(new PhongMaterial(color));
-        s1.setLayoutX(x-10);
-        s1.setLayoutY(y-10);
+        s1.setLayoutX(x-r);
+        s1.setLayoutY(y-r);
         s2.setMaterial(new PhongMaterial(color));
-        s2.setLayoutX(x+10);
-        s2.setLayoutY(y+10);
+        s2.setLayoutX(x+r);
+        s2.setLayoutY(y+r);
         RotateTransition rt = new RotateTransition(Duration.millis(1000), pn);
         rt.setInterpolator(Interpolator.LINEAR);
         rt.setCycleCount(Timeline.INDEFINITE);
@@ -155,18 +156,19 @@ class Cell {
      * and adds it to the cell pane.
      */
     private void threeSphere() {
+        int r = rad==20?10:5;
         Sphere s1 = new Sphere(rad);
         Sphere s2 = new Sphere(rad);
         Sphere s3 = new Sphere(rad);
         s1.setMaterial(new PhongMaterial(color));
-        s1.setLayoutX(x-10);
-        s1.setLayoutY(y-10);
+        s1.setLayoutX(x-r);
+        s1.setLayoutY(y-r);
         s2.setMaterial(new PhongMaterial(color));
-        s2.setLayoutX(x+10);
-        s2.setLayoutY(y-10);
+        s2.setLayoutX(x+r);
+        s2.setLayoutY(y-r);
         s3.setMaterial(new PhongMaterial(color));
         s3.setLayoutX(x);
-        s3.setLayoutY(y+10);
+        s3.setLayoutY(y+r);
         RotateTransition rt = new RotateTransition(Duration.millis(1000), pn);
         rt.setInterpolator(Interpolator.LINEAR);
         rt.setCycleCount(Timeline.INDEFINITE);

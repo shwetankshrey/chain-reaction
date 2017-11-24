@@ -18,6 +18,9 @@ public class PreferencesController {
 
     @FXML private ColorPicker colorPicker;
 
+    @FXML public void initialize() {
+        colorPicker.setValue(GameState.colorCodes[GameState.alterPlayer-1]);
+    }
     /**
      * Event Handler for Okay button, which saves the
      * color for each player in the Game State.
