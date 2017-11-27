@@ -12,9 +12,9 @@ import java.io.Serializable;
  * @since November 2017
  */
 public class SaveGame implements Serializable {
-    static int numPlayers;
-    static Color[] colorCodes;
-    static Cell[][] grid;
-    static int count;
+    int numPlayers;
+    int[] colorCodes;
+    Cell[][] grid;
+    int count;
 }
 

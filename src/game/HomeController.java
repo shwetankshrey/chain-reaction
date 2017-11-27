@@ -5,6 +5,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.paint.Color;
 
 
 /**
@@ -67,9 +68,16 @@ public class HomeController {
      * @throws Exception Any Exception
      */
     @FXML protected void resume(ActionEvent event) throws Exception {
+        if(GameState.isWon) {
+            return;
+        }
         SaveGame x = Main.load();
-        GameState.colorCodes = x.colorCodes;
+        for(int i = 0 ; i < 8 ; i++) {
+            GameState.colorCodes[i] = Color.web(Integer.toHexString(x.colorCodes[i]));
+        }
         GameState.numPlayers = x.numPlayers;
+        GameState.grid = x.grid;
+        GameState.count = x.count;
         GameState.saveGame = 1;
         if(x.grid[0][0].getRad() == 20) {
             Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/game1.fxml")), 600, 900);

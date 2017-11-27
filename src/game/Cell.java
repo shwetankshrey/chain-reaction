@@ -8,6 +8,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import javafx.util.Duration;
 
+import java.io.Serializable;
+
 /**
  * <h1>CELL CLASS</h1>
  * This class represents the individual element
@@ -19,12 +21,13 @@ import javafx.util.Duration;
  * @version 0.2
  * @since November 2017
  */
-class Cell {
-    private Color color;
+class Cell implements Serializable {
+    private transient Color color;
+    private int colx;
     private int x;
     private int y;
     public int numb;
-    private Pane pn;
+    private transient Pane pn;
     private int rad;
 
     /**
@@ -39,6 +42,7 @@ class Cell {
     Cell(int xd, int yd, int xs, int ys, int wd, int bs) {
         numb = 0;
         color = null;
+        colx = -1;
         pn= new Pane();
         x = xs + xd*wd;
         y = ys + yd*wd;
@@ -51,6 +55,7 @@ class Cell {
      */
     public void copy(Cell c) {
         this.color = c.color;
+        this.colx = c.colx;
         this.x = c.x;
         this.y = c.y;
         this.numb = c.numb;
@@ -63,6 +68,7 @@ class Cell {
      * @return Pane
      */
     public Pane getPn() {return pn;}
+    public void newPn() {pn = new Pane();}
 
     /**
      * Getter for Cell Color.
@@ -70,6 +76,9 @@ class Cell {
      */
     public Color getColor() {
         return color;
+    }
+    public int getCol() {
+        return colx;
     }
 
     /**
@@ -84,6 +93,11 @@ class Cell {
      */
     public void setColor(Color color) {
         this.color = color;
+        if(noColor()) {
+            colx = -1;
+            return;
+        }
+        this.colx = color.hashCode();
     }
 
     /**

@@ -16,8 +16,10 @@ public class GameState {
     protected static int numPlayers;
     protected static int alterPlayer;
     protected static int saveGame;
-    protected static boolean isWon;
+    protected static boolean isWon = true;
     protected static AudioClip sfx = new AudioClip(GameState.class.getResource("../resources/sound/beep.wav").toString());
     protected static String sval = "Beep";
     protected static Color[] colorCodes = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.PURPLE, Color.CYAN, Color.ORANGE, Color.WHITE};
+    protected static Cell[][] grid;
+    protected static int count;
 }

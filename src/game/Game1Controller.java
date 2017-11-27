@@ -59,8 +59,20 @@ public class Game1Controller {
         for(int i = 0 ; i < 6 ; i++) {
             for(int j = 0 ; j < 8 ; j++) {
                 if(GameState.saveGame == 1) {
-                    grid[i][j] = SaveGame.grid[i][j];
-                    undogrid[i][j] = SaveGame.grid[i][j];
+                    grid[i][j] = GameState.grid[i][j];
+                    undogrid[i][j] = GameState.grid[i][j];
+                    String hx = Integer.toHexString(GameState.grid[i][j].getCol());
+                    if(hx.equals("0")) { hx = "00000000"; }
+                    Color cl = Color.web(hx);
+                    if(GameState.grid[i][j].getCol() == -1) {
+                        cl = null;
+                    }
+                    grid[i][j].setColor(cl);
+                    undogrid[i][j].setColor(cl);
+                    grid[i][j].newPn();
+                    undogrid[i][j].newPn();
+                    grid[i][j].clk();
+                    undogrid[i][j].clk();
                 }
                 else {
                     grid[i][j] = new Cell(i, j, 100, 219, 80, 20);
@@ -70,7 +82,7 @@ public class Game1Controller {
             }
         }
         if(GameState.saveGame == 1) {
-            count = SaveGame.count;
+            count = GameState.count;
         }
         else {
             count = 0;
@@ -111,12 +123,15 @@ public class Game1Controller {
      * @throws Exception Any Exception
      */
     @FXML protected void save(ActionEvent event) throws Exception {
-        SaveGame s1 = new SaveGame();
-        s1.numPlayers = GameState.numPlayers;
-        s1.colorCodes = GameState.colorCodes;
-        s1.grid = grid;
-        s1.count = count;
-        Main.save(s1);
+        SaveGame sx = new SaveGame();
+        sx.numPlayers = GameState.numPlayers;
+        sx.colorCodes = new int[8];
+        for(int i = 0 ; i < 8 ; i++) {
+            sx.colorCodes[i] = GameState.colorCodes[i].hashCode();
+        }
+        sx.grid = grid;
+        sx.count = count;
+        Main.save(sx);
     }
 
     /**
@@ -126,10 +141,6 @@ public class Game1Controller {
      * @throws Exception Any Exception
      */
     @FXML protected void goHome(ActionEvent event) throws Exception {
-        SaveGame.grid = null;
-        SaveGame.colorCodes = null;
-        SaveGame.numPlayers = 0;
-        SaveGame.count = 0;
         Scene s = new Scene(FXMLLoader.load(getClass().getResource("../resources/fxml/home.fxml")), 600, 900);
         GameState.mainStage.setScene(s);
     }
@@ -358,23 +369,20 @@ public class Game1Controller {
      * @throws Exception Any Exception
      */
     @FXML protected void undo(ActionEvent event) throws Exception {
-        List<Node> l = root.getChildren();
-        grid = new Cell[6][8];
-        for(int i = 0 ; i < 6 ; i++) {
-            for(int j = 0 ; j < 8 ; j++) {
-                grid[i][j] = undogrid[i][j];
-                grid[i][j].copy(undogrid[i][j]);
-                grid[i][j].clk();
-            }
-        }
-        count--;
         undoB.setVisible(false);
-        for (Node i : l) {
+        count--;
+        for (Node i : root.getChildren()) {
             if (i instanceof Rectangle) {
                 ((Rectangle) i).setStroke(cs[count % numP]);
             }
             if (i instanceof Line) {
                 ((Line) i).setStroke(cs[count % numP]);
+            }
+        }
+        for(int i = 0 ; i < 6 ; i++) {
+            for (int j = 0; j < 8; j++) {
+                grid[i][j].copy(undogrid[i][j]);
+                grid[i][j].clk();
             }
         }
     }
